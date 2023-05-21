@@ -1,5 +1,6 @@
 const AMOUNT = 'Quantidade'
 const NAME = 'Nome'
+const ADD = 'add'
 const form = document.getElementById('formNovoItem')
 var items = getItemsLocalStorage()
 
@@ -7,17 +8,20 @@ restoreItensListFromLocalStorage(items)
 
 form.addEventListener('submit', (event) => {
   event.preventDefault()
+
+  const type = event.submitter.id;
   const name = event.target.elements['name'];
   const amount = event.target.elements['amount'];
-
+  const indexItem = hasItem(items, name.value)
+  
   if (!name.value) return;
   if (!amount.value) amount.value = 0;
 
   const newItem = {name: name.value, amount: amount.value}
-
-  if (hasItem(items, name.value)) {
-    updateItemElement(newItem)
-    updateItem(items, newItem)
+  
+  if (indexItem >= 0) {
+    updateItem(items, newItem, type, indexItem)
+    updateItemElement(items, newItem, indexItem)
   }
   else {
     const itemElement = createItemElement(newItem)
@@ -50,27 +54,27 @@ function insertItemElementInList(itemElement) {
 }
 
 function insertItem(items, {name, amount}){
-  //const id = items[items.length -1] ? (items[items.length - 1]).id + 1 : 0
   const newItem = {
-    //id: id,
     [NAME]: name,
     [AMOUNT]: amount
   }
   items.push(newItem)
 }
 
-function updateItemElement({name, amount}) {
+function updateItemElement(items, {name}, indexItem) {
   const itemElement = document.getElementsByName(name)
-  itemElement[0].textContent = parseInt(itemElement[0].textContent) + parseInt(amount)
+  itemElement[0].textContent = items[indexItem][AMOUNT]
 }
 
-function updateItem(items, newItem){
-  items.map(item => {
-    if (item[NAME] === newItem.name){
-      item[AMOUNT] = parseInt(item[AMOUNT]) + parseInt(newItem.amount)
-    }
-    return item
-  })
+function addOrUpdateAmount(type, amount, newAmount){
+  if(type === ADD) 
+    return parseInt(amount) + parseInt(newAmount)
+  else
+    return parseInt(newAmount)
+}
+
+function updateItem(items, newItem, type, indexItem){
+  items[indexItem][AMOUNT] = addOrUpdateAmount(type, items[indexItem][AMOUNT], newItem.amount)
 }
 
 function removeButton(name){
@@ -105,7 +109,7 @@ function getItemsLocalStorage() {
 }
 
 function hasItem(items, value) {
-  return items.find(item => item[NAME] === value)
+  return items.findIndex(item => item[NAME] === value)
 }
 
 function setItemsLocalStorage(items) {
