@@ -1,9 +1,9 @@
 const AMOUNT = 'Quantidade'
 const NAME = 'Nome'
-
 const form = document.getElementById('formNovoItem')
+var items = getItemsLocalStorage()
 
-restoreItensListFromLocalStorage()
+restoreItensListFromLocalStorage(items)
 
 form.addEventListener('submit', (event) => {
   event.preventDefault()
@@ -14,30 +14,32 @@ form.addEventListener('submit', (event) => {
   if (!amount.value) amount.value = 0;
 
   const newItem = {name: name.value, amount: amount.value}
-  const items = getItemsLocalStorage()
 
-
-  if (hasItemLocalStorage(items, name.value)) {
-    updateItemLocalStorage(items, newItem)
+  if (hasItem(items, name.value)) {
+    updateItemElement(newItem)
+    updateItem(items, newItem)
   }
   else {
     const itemElement = createItemElement(newItem)
     insertItemElementInList(itemElement)
-    saveItemLocalStorage(items, {name: name.value, amount: amount.value})
+    insertItem(items, newItem)
   }
 
+  setItemsLocalStorage(items)
   handleInputClear(name, amount)
 })
-
 
 function createItemElement({name, amount}) {
   const strongElement = document.createElement('strong');
   strongElement.innerHTML = amount;
+  strongElement.setAttribute('name', name);
 
   const itemElement = document.createElement('li');
   itemElement.className = 'item'
   itemElement.appendChild(strongElement)
   itemElement.innerHTML += name;
+
+  itemElement.appendChild(removeButton(name))
 
   return itemElement;
 }
@@ -45,6 +47,52 @@ function createItemElement({name, amount}) {
 function insertItemElementInList(itemElement) {
   const list = document.getElementById('list')
   list.appendChild(itemElement)
+}
+
+function insertItem(items, {name, amount}){
+  //const id = items[items.length -1] ? (items[items.length - 1]).id + 1 : 0
+  const newItem = {
+    //id: id,
+    [NAME]: name,
+    [AMOUNT]: amount
+  }
+  items.push(newItem)
+}
+
+function updateItemElement({name, amount}) {
+  const itemElement = document.getElementsByName(name)
+  itemElement[0].textContent = parseInt(itemElement[0].textContent) + parseInt(amount)
+}
+
+function updateItem(items, newItem){
+  items.map(item => {
+    if (item[NAME] === newItem.name){
+      item[AMOUNT] = parseInt(item[AMOUNT]) + parseInt(newItem.amount)
+    }
+    return item
+  })
+}
+
+function removeButton(name){
+  const button = document.createElement('button')
+  button.innerText = 'X'
+  button.className = 'remover'
+
+  button.addEventListener('click', function(){
+    removeItem(name)
+    removeElement(this.parentNode)
+  })
+  return button;
+}
+
+function removeItem( name){
+  const itemsFiltered = items.filter(item => item[NAME] !== name)
+  items = itemsFiltered
+  setItemsLocalStorage(itemsFiltered)
+}
+
+function removeElement(element){
+  element.remove()
 }
 
 function handleInputClear(name, amount) {
@@ -56,38 +104,17 @@ function getItemsLocalStorage() {
   return localStorage.getItem("lista") ? JSON.parse(localStorage.getItem("lista")) : []
 }
 
-function hasItemLocalStorage(items, value) {
+function hasItem(items, value) {
   return items.find(item => item[NAME] === value)
 }
 
-function saveItemLocalStorage( items, {name, amount}) {
-  const newItem = {
-    [NAME]: name,
-    [AMOUNT]: amount
-  }
-  items.push(newItem)
-  setItemsLocalStorage(items)
-}
-
-function updateItemLocalStorage(items, newItem) {
-  const newItems = items.map(item => {
-    if (item[NAME] === newItem.name)
-      item[AMOUNT] = parseInt(item[AMOUNT]) + parseInt(newItem.amount)
-    
-    return item
-  })
-  setItemsLocalStorage(newItems)
-}
-
 function setItemsLocalStorage(items) {
-  //* o localStorage aceita apenas string
-  //* dados sensiveis devem ser armazenados nos cookies e criptografados
+  //O localStorage aceita apenas string
+  //Dados sensíveis devem ser armazenados nos cookies
   localStorage.setItem("lista" , JSON.stringify(items))
 }
 
-function restoreItensListFromLocalStorage() {
-  const items = getItemsLocalStorage()
-
+function restoreItensListFromLocalStorage(items) {
   items.forEach(item => {
     const itemElement = createItemElement({name: item[NAME], amount: item[AMOUNT]})
     insertItemElementInList(itemElement)
