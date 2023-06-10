@@ -4,6 +4,13 @@ html {
     font-family: 'Roboto', cursive;
 }
 
+.root {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
 .conteudo {
     padding: 10vh 3em 0;
     display: flex;
@@ -79,6 +86,7 @@ html {
 
 .adicionar {
     width: 100%;
+    display: block;
 }
 
 .adicionar input {
@@ -90,11 +98,13 @@ html {
     border: 2px solid #40112D;
 }
 
-.adicionar label {
-    display: block;
-}
-
 .cadastrar {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0.5em 0 1em;
+    padding: 1em 0.5em;
+    border-radius: 10px;
+    border: 2px solid #40112D;
     background-color: #40112D;
     color: #FFFFFF;
     cursor: pointer;
@@ -132,4 +142,12 @@ html {
 
 .remover {
     margin-left: auto;
+}
+
+.description {
+    display: inline-flex;
+    padding: 0.6em 0.1em;
+    border-radius: 10px;
+    font-size: 20px;
+    width: 70%;
 }

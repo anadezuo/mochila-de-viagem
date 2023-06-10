@@ -12,22 +12,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"> 
 </head>
 <body>
-    <main class="conteudo">
-        <div class="principal">
-            <div class="mochila"></div>
-            <form action="" class="adicionar" id="formNovoItem">
-                <label for="item">Nome</label>
-                <input type="text" name="name" id="name">
-                <label for="item">Quantidade</label>
-                <input type="number" name="amount" id="amount">
-                <input type="submit" value="Adicionar" class="cadastrar" id="add">
-                <input type="submit" value="Atualizar" class="cadastrar" id="update">
-            </form>
+    <main class="root">
+        <div class="conteudo">
+            <div class="principal">
+                <div class="mochila"></div>
+                <form action="" class="adicionar" id="formNovoItem">
+                    <label for="item">Nome</label>
+                    <input type="text" name="name" id="name">
+                    <label for="item">Quantidade</label>
+                    <input type="number" name="amount" id="amount">
+                    <label for="item">Descrição</label>
+                    <input type="text" name="description" id="description">
+                    <button type="submit" class="cadastrar" id="add"> Adicionar item</button>
+                    <button type="submit" class="cadastrar" id="update"> Substituir item </button>
+                </form>
+            </div>
+
+            <ul class="lista" id="list">
+            </ul>
         </div>
-        
-        <ul class="lista" id="list">
-            <li class="item"><strong name="Celular">1</strong>Celular</li>
-        </ul>
+
+        <div>
+            <button class="cadastrar" id="default" onClick="addDefaultList()"> Adicionar lista padrão </button>
+        </div>
     </main>
     <script src="js/main.js"></script>
 </body>

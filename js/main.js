@@ -1,5 +1,6 @@
 const AMOUNT = 'Quantidade'
 const NAME = 'Nome'
+const DESCRIPTION = 'Descrição'
 const ADD = 'add'
 const form = document.getElementById('formNovoItem')
 var items = getItemsLocalStorage()
@@ -9,15 +10,23 @@ restoreItensListFromLocalStorage(items)
 form.addEventListener('submit', (event) => {
   event.preventDefault()
 
-  const type = event.submitter.id;
-  const name = event.target.elements['name'];
-  const amount = event.target.elements['amount'];
-  const indexItem = hasItem(items, name.value)
+  const type = event.submitter.id
+  const name = event.target.elements['name']
+  const amount = event.target.elements['amount']
+  const description = event.target.elements['description']
   
-  if (!name.value) return;
-  if (!amount.value) amount.value = 0;
+  if (!name.value) return
+  if (!amount.value) amount.value = 0
+  if (!description.value) description.value = ""
 
-  const newItem = {name: name.value, amount: amount.value}
+  addOrUpdateItem(type, {name: name.value, amount: amount.value, description: description.value})
+
+  handleInputClear(name, amount, description)
+})
+
+function addOrUpdateItem(type, {name, amount, description}){
+  const indexItem = hasItem(items, name)
+  const newItem = {name: name, amount: amount, description: description}
   
   if (indexItem >= 0) {
     updateItem(items, newItem, type, indexItem)
@@ -30,22 +39,31 @@ form.addEventListener('submit', (event) => {
   }
 
   setItemsLocalStorage(items)
-  handleInputClear(name, amount)
-})
+}
 
-function createItemElement({name, amount}) {
-  const strongElement = document.createElement('strong');
-  strongElement.innerHTML = amount;
-  strongElement.setAttribute('name', name);
 
-  const itemElement = document.createElement('li');
+
+function createItemElement({name, amount, description}) {
+  const strongElement = document.createElement('strong')
+  strongElement.innerHTML = amount
+  strongElement.setAttribute('name', name)
+
+  const itemElement = document.createElement('li')
   itemElement.className = 'item'
   itemElement.appendChild(strongElement)
-  itemElement.innerHTML += name;
+  itemElement.innerHTML += name
 
+  const descriptionElement = document.createElement('input')
+  descriptionElement.className = 'description'
+  descriptionElement.id = buildDescriptionId(name)
+  descriptionElement.value = description
+  descriptionElement.setAttribute('disabled',true)
+  descriptionElement.setAttribute('type','true')
+
+  itemElement.appendChild(descriptionElement)
   itemElement.appendChild(removeButton(name))
 
-  return itemElement;
+  return itemElement
 }
 
 function insertItemElementInList(itemElement) {
@@ -53,17 +71,25 @@ function insertItemElementInList(itemElement) {
   list.appendChild(itemElement)
 }
 
-function insertItem(items, {name, amount}){
+function insertItem(items, {name, amount, description}){
   const newItem = {
     [NAME]: name,
-    [AMOUNT]: amount
+    [AMOUNT]: amount,
+    [DESCRIPTION]: description
   }
   items.push(newItem)
+}
+
+function buildDescriptionId(name){
+  return `description-${name}`
 }
 
 function updateItemElement(items, {name}, indexItem) {
   const itemElement = document.getElementsByName(name)
   itemElement[0].textContent = items[indexItem][AMOUNT]
+
+  const itemDescription = document.getElementById(buildDescriptionId(name))
+  itemDescription.value = items[indexItem][DESCRIPTION]
 }
 
 function addOrUpdateAmount(type, amount, newAmount){
@@ -75,6 +101,9 @@ function addOrUpdateAmount(type, amount, newAmount){
 
 function updateItem(items, newItem, type, indexItem){
   items[indexItem][AMOUNT] = addOrUpdateAmount(type, items[indexItem][AMOUNT], newItem.amount)
+  
+  if(newItem.description !== '')
+    items[indexItem][DESCRIPTION] = newItem.description
 }
 
 function removeButton(name){
@@ -86,7 +115,7 @@ function removeButton(name){
     removeItem(name)
     removeElement(this.parentNode)
   })
-  return button;
+  return button
 }
 
 function removeItem( name){
@@ -99,9 +128,10 @@ function removeElement(element){
   element.remove()
 }
 
-function handleInputClear(name, amount) {
+function handleInputClear(name, amount, description) {
   name.value = ""
   amount.value = ""
+  description.value = ""
 }
 
 function getItemsLocalStorage() {
@@ -120,7 +150,22 @@ function setItemsLocalStorage(items) {
 
 function restoreItensListFromLocalStorage(items) {
   items.forEach(item => {
-    const itemElement = createItemElement({name: item[NAME], amount: item[AMOUNT]})
+    const itemElement = createItemElement({name: item[NAME], amount: item[AMOUNT], description: item[DESCRIPTION]})
     insertItemElementInList(itemElement)
   })
+}
+
+function addDefaultList(){
+  const defaultList = [
+    { [NAME]: 'Documentos', [AMOUNT]: '1', [DESCRIPTION]: ''},
+    { [NAME]: 'Dinheiro', [AMOUNT]: '1', [DESCRIPTION]: ''},
+    { [NAME]: 'Celular', [AMOUNT]: '1', [DESCRIPTION]: ''},
+    { [NAME]: 'Calça', [AMOUNT]: '1', [DESCRIPTION]: ''},
+    { [NAME]: 'Camisetas', [AMOUNT]: '1', [DESCRIPTION]: ''},
+    { [NAME]: 'Chinelo', [AMOUNT]: '1', [DESCRIPTION]: ''},
+  ]
+
+  defaultList.forEach(item => 
+    addOrUpdateItem(ADD, {name: item[NAME], amount: item[AMOUNT], description: item[DESCRIPTION]})
+  )
 }
